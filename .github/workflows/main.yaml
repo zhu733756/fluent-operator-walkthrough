@@ -1,0 +1,81 @@
+name: 'main ci'
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        severity: error
+
+  es:
+    name: Test Elasticsearch Installation
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.6.3
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
+    - name: Create Cluster
+      run: |
+        chmod +x ./create-kind-cluster.sh && ./create-kind-cluster.sh
+    
+    - name: Test ES Installation
+      run: |
+        chmod +x ./deploy-es.sh && bash ./deploy-es.sh
+
+  kafka:
+    name: Test Kafka Installation
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.6.3
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Create Cluster
+      run: |
+        chmod +x ./create-kind-cluster.sh && ./create-kind-cluster.sh
+    
+    - name: Test KAFKA Installation
+      run: |
+        chmod +x ./deploy-kafka.sh && bash ./deploy-kafka.sh
+
+  fluent-operator:
+    name: Test Fluent Operator installation
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Create Cluster
+      run: |
+        chmod +x ./create-kind-cluster.sh && ./create-kind-cluster.sh
+    
+    - name: Test Fluent Operator
+      run: |
+        chmod +x ./deploy-fluent-operator.sh && bash ./deploy-fluent-operator.sh
